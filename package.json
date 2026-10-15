@@ -1,0 +1,27 @@
+{
+  "name": "devtag",
+  "version": "0.1.0",
+  "description": "",
+  "main": "src/cli.ts",
+  "bin": {
+    "gitsound": "./dist/cli.js",
+    "git": "./dist/git-shim.js"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc",
+    "dev": "tsx src/cli.ts"
+  },
+  "keywords": [],
+  "type": "module",
+  "dependencies": {
+    "@inquirer/prompts": "^8.7.3",
+    "commander": "^15.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}
