@@ -19,8 +19,5 @@ export function getConfigPath(options: ConfigPathOptions = {}): string {
   if (platform === "darwin") {
     return join(home, "Library", "Application Support", "DevTag", "config.json");
   }
-  if (platform === "linux" || platform === "win32") {
-    return join(env.XDG_CONFIG_HOME || join(home, ".config"), "devtag", "config.json");
-  }
   return join(env.XDG_CONFIG_HOME || join(home, ".config"), "devtag", "config.json");
 }
