@@ -1,4 +1,4 @@
-import { accessSync, constants as fsConstants } from "node:fs";
+import { accessSync, constants as fsConstants, existsSync } from "node:fs";
 import { mkdir, readFile, rm, writeFile, chmod } from "node:fs/promises";
 import { spawn, type ChildProcess } from "node:child_process";
 import { delimiter, dirname, join, resolve } from "node:path";
@@ -39,7 +39,16 @@ function integrationDir(): string {
   return join(process.env.XDG_CONFIG_HOME || join(homedir(), ".config"), "devtag", "shim");
 }
 
-function shimSourcePath(): string { return resolve(sourceDir, "git-shim.js"); }
+function shimSourcePath(): string {
+  const adjacent = resolve(sourceDir, "git-shim.js");
+  if (existsSync(adjacent)) return adjacent;
+
+  // `npm run dev` loads this module from src/services, while the runtime shim
+  // is emitted under dist/services by `npm run build`.
+  const built = resolve(sourceDir, "../../dist/services/git-shim.js");
+  if (existsSync(built)) return built;
+  throw new Error("Could not find the Git shim runtime. Run `npm run build` and try again.");
+}
 
 export async function installIntegration(options: { directory?: string; scriptPath?: string; platform?: NodeJS.Platform } = {}): Promise<string> {
   const platform = options.platform ?? process.platform;
