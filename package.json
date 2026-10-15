@@ -2,10 +2,9 @@
   "name": "devtag",
   "version": "0.1.0",
   "description": "",
-  "main": "src/cli.ts",
+  "main": "./dist/cli.js",
   "bin": {
-    "gitsound": "./dist/cli.js",
-    "git": "./dist/git-shim.js"
+    "devtag": "./dist/cli.js"
   },
   "scripts": {
     "test": "vitest run",
