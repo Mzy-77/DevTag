@@ -23,7 +23,7 @@ devtag config
 
 Configuration is stored per user, outside repositories:
 
-- Windows: `%APPDATA%\DevTag\config.json`
+- Windows: `%APPDATA%\\DevTag\\config.json`
 - macOS: `~/Library/Application Support/DevTag/config.json`
 - Linux: `$XDG_CONFIG_HOME/devtag/config.json`, or `~/.config/devtag/config.json`
 
