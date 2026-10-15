@@ -2,6 +2,7 @@ import { access, open, stat } from "node:fs/promises";
 import { constants } from "node:fs";
 import { spawn, type SpawnOptions } from "node:child_process";
 import { basename, extname, resolve } from "node:path";
+import { confirm } from "@inquirer/prompts";
 
 const FORMATS = new Set([".wav", ".mp3", ".m4a", ".aac", ".ogg", ".oga", ".flac", ".aiff", ".aif", ".wma"]);
 
@@ -86,6 +87,56 @@ export async function validateSoundPath(filePath: string, cwd = process.cwd()): 
 
 type SpawnFunction = (command: string, args: string[], options: SpawnOptions) => ReturnType<typeof spawn>;
 export interface AudioOptions { spawnProcess?: SpawnFunction; platform?: NodeJS.Platform }
+
+export function soundNeedsFfplay(path: string, platform: NodeJS.Platform = process.platform): boolean {
+  const extension = extname(path).toLowerCase();
+  const macNative = new Set([".wav", ".mp3", ".m4a", ".aac", ".aiff", ".aif"]);
+  return extension !== ".wav" && (platform !== "darwin" || !macNative.has(extension));
+}
+
+async function commandExists(command: string): Promise<boolean> {
+  return new Promise((resolvePromise) => {
+    let child;
+    try { child = spawn(command, ["-version"], { stdio: "ignore", windowsHide: true }); }
+    catch { resolvePromise(false); return; }
+    child.once("error", () => resolvePromise(false));
+    child.once("close", (code) => resolvePromise(code === 0));
+  });
+}
+
+async function ffmpegInstaller(platform: NodeJS.Platform): Promise<[string, string[]] | undefined> {
+  if (platform === "darwin") return ["brew", ["install", "ffmpeg"]];
+  if (platform === "win32") return ["winget", ["install", "--id", "Gyan.FFmpeg", "--exact"]];
+  if (platform === "linux") {
+    const managers: [string, string[]][] = [
+      ["apt-get", ["install", "-y", "ffmpeg"]],
+      ["dnf", ["install", "-y", "ffmpeg"]],
+      ["pacman", ["-S", "--noconfirm", "ffmpeg"]],
+      ["zypper", ["install", "-y", "ffmpeg"]],
+    ];
+    for (const [manager, args] of managers) {
+      if (await commandExists(manager)) return process.getuid?.() === 0 ? [manager, args] : ["sudo", [manager, ...args]];
+    }
+  }
+  return undefined;
+}
+
+/** Offers to install FFmpeg when an interactive command needs ffplay. */
+export async function ensureFfplay(path: string): Promise<boolean> {
+  if (!soundNeedsFfplay(path)) return true;
+  if (await commandExists("ffplay")) return true;
+  const installer = await ffmpegInstaller(process.platform);
+  if (!installer) throw new Error("ffplay is required for this audio format. Install FFmpeg and try again.");
+  const accepted = await confirm({ message: "ffplay is missing. Install FFmpeg now?", default: false });
+  if (!accepted) return false;
+  await new Promise<void>((resolvePromise, reject) => {
+    const child = spawn(installer[0], installer[1], { stdio: "inherit", windowsHide: true });
+    child.once("error", (error) => reject(new Error(`Could not start ${installer[0]}. Install FFmpeg manually and try again.`, { cause: error })));
+    child.once("close", (code) => code === 0 ? resolvePromise() : reject(new Error(`FFmpeg installation failed (status ${code}). Install it manually and try again.`)));
+  });
+  if (!(await commandExists("ffplay"))) throw new Error("FFmpeg installed, but ffplay is still unavailable on PATH. Restart the terminal and try again.");
+  return true;
+}
 
 function playerFor(platform: NodeJS.Platform, path: string): [string, string[]] {
   const extension = extname(path).toLowerCase();
