@@ -1,7 +1,11 @@
 {
   "name": "devtag",
   "version": "0.1.1",
-  "description": "",
+  "description": "Play a custom sound after a successful git push",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "main": "./dist/cli.js",
   "bin": {
     "devtag": "./dist/cli.js"
