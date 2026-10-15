@@ -12,7 +12,9 @@ DevTag is a small Node.js CLI that plays a sound after an ordinary `git push` su
 ## Install and configure
 
 ```sh
-npm install --global devtag
+npm install
+npm run build
+npm link
 devtag init
 devtag sound set
 devtag sound test
