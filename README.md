@@ -1,13 +1,13 @@
 # DevTag
 
-DevTag is a small Node.js CLI that plays a WAV sound after an ordinary `git push` succeeds. It does not contact GitHub or require credentials.
+DevTag is a small Node.js CLI that plays a sound after an ordinary `git push` succeeds. It does not contact GitHub or require credentials.
 
 ## Requirements
 
 - Node.js 22.12 or newer (use an active Node.js LTS release)
 - Git
-- A WAV file
-- For playback: `afplay` on macOS (included with macOS), Windows PowerShell with `System.Media.SoundPlayer`, or `aplay` on Linux (commonly provided by `alsa-utils`). DevTag does not bundle a native audio library. On Linux, install `alsa-utils` if `aplay` is unavailable.
+- An audio file in WAV, MP3, M4A, AAC, OGG/OGA, FLAC, AIFF/AIF, or WMA format
+- For playback: WAV uses `afplay` on macOS, Windows PowerShell, or `aplay` on Linux. macOS uses `afplay` for MP3, M4A, AAC, and AIFF. Other compressed formats use `ffplay` (included with FFmpeg); install FFmpeg on Windows/Linux and for OGG, FLAC, or WMA on macOS. DevTag does not bundle an audio decoder. On Linux, install `alsa-utils` if `aplay` is unavailable.
 
 ## Install and configure
 
@@ -19,7 +19,7 @@ devtag sound test
 devtag config
 ```
 
-`devtag sound set` asks for a file path in the terminal. Relative paths are resolved from the current directory. DevTag checks that the path is readable, points to a regular file, and contains uncompressed PCM RIFF/WAVE audio before asking for confirmation. Paths with spaces can be pasted as-is. Cancelling leaves the previous setting unchanged.
+`devtag sound set` asks for a file path in the terminal. Relative paths are resolved from the current directory. DevTag checks that the path is readable, points to a regular file, and has a recognized audio extension and matching file signature before asking for confirmation. WAV files must contain uncompressed PCM audio. Paths with spaces can be pasted as-is. Cancelling leaves the previous setting unchanged.
 
 Configuration is stored per user, outside repositories:
 
@@ -62,5 +62,5 @@ The package executable is `devtag`. The compiled program is emitted to `dist/` w
 
 - `Could not find the real Git executable`: make sure Git is on PATH after the shim, or set `DEVTAG_REAL_GIT` to its full path.
 - No sound after a successful push: verify `devtag config`, ensure the application resolves `git` through the shim, and try `devtag sound test`.
-- Linux player unavailable: install `aplay` (for example, the `alsa-utils` package for your distribution).
+- Linux WAV player unavailable: install `aplay` (for example, the `alsa-utils` package for your distribution). For compressed formats, install FFmpeg so `ffplay` is available.
 - A failed push should not play sound. The shim returns Git's original nonzero status; playback errors are reported separately and do not change a successful Git exit result.

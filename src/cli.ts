@@ -19,7 +19,7 @@ program
   .action(initialize);
 
 const sound = program.command("sound").description("Configure or test the success sound");
-sound.command("set").description("Choose a WAV file by entering its path").action(setSound);
+sound.command("set").description("Choose an audio file by entering its path").action(setSound);
 sound.command("test").description("Play the configured sound").action(testSound);
 program.command("config").description("Display the current configuration").action(showConfig);
 program.command("install").description("Install the Git command shim").action(async () => {
